@@ -36,6 +36,7 @@ function coldemo_post_columns( $columns ){
     $columns['id'] = __('Post ID', 'columndemo');
     $columns['thumbnail'] = __('Thumbnail', 'columndemo');
     $columns['wordcount'] = __('Word Count', 'columndemo');
+    $columns['readingTime'] = __('Reading Time', 'columndemo');
 
     return $columns;
 }
@@ -52,6 +53,22 @@ function coldemo_post_column_data($column, $post_id){
         $wordn = str_word_count(strip_tags($content));*/
         $wordn = get_post_meta($post_id, 'wordn', true);
         echo $wordn; 
+    }elseif('readingTime' == $column){
+        $_post = get_post($post_id);
+        $content = $_post->post_content;
+        $stripped_content = strip_tags($content);
+        $wordn = str_word_count($stripped_content);
+        $reading_munites = floor($wordn / 200);
+        $reading_secounds = floor($wordn % 200 / (200/60));
+
+        $is_visible = apply_filters('wordcoun_display_readingtime', 1);
+        if($is_visible){
+            $label = __('Time', 'wordcount');
+            $label = apply_filters('wordcount_readingtime_heading', $label);
+            $tag = apply_filters('wordcount_readingtime_tag','h4');
+            $content = sprintf('<%s> %s  : %sm %ss</%s>', $tag,$label, $reading_munites, $reading_secounds,$tag);
+        }
+        echo $content;
     }
 }
 add_action('manage_posts_custom_column', 'coldemo_post_column_data',10,2);
@@ -120,8 +137,6 @@ function coldemo_pages_column_data($column, $post_id){
     }
 }
 add_action('manage_pages_custom_column', 'coldemo_pages_column_data',10,2);
-
-
 
 //Post Filter Create
 
